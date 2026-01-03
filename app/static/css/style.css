@@ -1,0 +1,351 @@
+﻿@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
+:root {
+    /* Modern Professional Colors */
+    --primary-gradient: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+    --success-gradient: linear-gradient(135deg, #10b981 0%, #06b6d4 100%);
+    --warning-gradient: linear-gradient(135deg, #f59e0b 0%, #ef4444 100%);
+    --info-gradient: linear-gradient(135deg, #3b82f6 0%, #06b6d4 100%);
+    
+    /* Neutral Colors */
+    --bg-primary: #ffffff;
+    --bg-secondary: #f8fafc;
+    --text-primary: #0f172a;
+    --text-secondary: #64748b;
+    --border-color: #e2e8f0;
+    
+    /* Glass Effect */
+    --glass-bg: rgba(255, 255, 255, 0.7);
+    --glass-border: rgba(255, 255, 255, 0.18);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    background: linear-gradient(135deg, #f8fafc 0%, #e0e7ff 50%, #ddd6fe 100%);
+    background-attachment: fixed;
+    min-height: 100vh;
+    color: var(--text-primary);
+}
+
+/* Modern Navbar - Clean & Professional */
+.navbar {
+    background: rgba(255, 255, 255, 0.95) !important;
+    backdrop-filter: blur(20px) saturate(180%);
+    border-bottom: 1px solid rgba(226, 232, 240, 0.8);
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
+    padding: 1rem 0;
+}
+
+.navbar-brand {
+    font-weight: 800;
+    color: #0f172a !important;
+    font-size: 1.4rem;
+    letter-spacing: -0.02em;
+}
+
+.nav-link {
+    color: #475569 !important;
+    font-weight: 600;
+    padding: 0.6rem 1.2rem !important;
+    border-radius: 10px;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    font-size: 0.95rem;
+}
+
+.nav-link:hover {
+    background: rgba(99, 102, 241, 0.1);
+    color: #6366f1 !important;
+    transform: translateY(-1px);
+}
+
+/* Modern Cards - Clean Glass Effect */
+.card {
+    background: var(--glass-bg);
+    backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid var(--glass-border);
+    border-radius: 20px;
+    box-shadow: 0 4px 24px rgba(15, 23, 42, 0.08);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    margin-bottom: 2rem;
+}
+
+.card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 12px 40px rgba(15, 23, 42, 0.12);
+    border-color: rgba(99, 102, 241, 0.3);
+}
+
+/* Stat Cards - Modern & Vibrant */
+.stat-card h3 {
+    font-size: 2.8rem;
+    font-weight: 900;
+    background: var(--primary-gradient);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    letter-spacing: -0.03em;
+}
+
+.stat-card:nth-child(1) h3 {
+    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.stat-card:nth-child(2) h3 {
+    background: linear-gradient(135deg, #10b981 0%, #06b6d4 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.stat-card:nth-child(3) h3 {
+    background: linear-gradient(135deg, #f59e0b 0%, #ef4444 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.stat-card:nth-child(4) h3 {
+    background: linear-gradient(135deg, #3b82f6 0%, #06b6d4 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+/* Premium Buttons */
+.btn-primary {
+    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+    border: none;
+    border-radius: 12px;
+    padding: 0.75rem 1.8rem;
+    font-weight: 700;
+    box-shadow: 0 4px 16px rgba(99, 102, 241, 0.25);
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(99, 102, 241, 0.35);
+}
+
+/* Modern Table */
+.table thead th {
+    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+    color: white;
+    font-weight: 800;
+    padding: 1.2rem 1rem;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    letter-spacing: 1.2px;
+    border: none;
+}
+
+.table tbody tr {
+    border-bottom: 1px solid var(--border-color);
+    transition: all 0.2s ease;
+}
+
+.table tbody tr:hover {
+    background: rgba(99, 102, 241, 0.05);
+    transform: scale(1.005);
+}
+
+/* Badges */
+.badge.bg-success {
+    background: linear-gradient(135deg, #10b981 0%, #06b6d4 100%) !important;
+    box-shadow: 0 2px 8px rgba(16, 185, 129, 0.25);
+    padding: 0.5rem 0.9rem;
+    border-radius: 8px;
+}
+
+.badge.bg-info {
+    background: linear-gradient(135deg, #3b82f6 0%, #06b6d4 100%) !important;
+    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.25);
+    padding: 0.5rem 0.9rem;
+    border-radius: 8px;
+}
+
+/* Override Bootstrap stat cards with clean modern gradients */
+.stat-card.bg-primary {
+    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%) !important;
+    border: none !important;
+    box-shadow: 0 8px 32px rgba(99, 102, 241, 0.2) !important;
+}
+
+.stat-card.bg-success {
+    background: linear-gradient(135deg, #10b981 0%, #06b6d4 100%) !important;
+    border: none !important;
+    box-shadow: 0 8px 32px rgba(16, 185, 129, 0.2) !important;
+}
+
+.stat-card.bg-warning {
+    background: linear-gradient(135deg, #f59e0b 0%, #ef4444 100%) !important;
+    border: none !important;
+    box-shadow: 0 8px 32px rgba(245, 158, 11, 0.2) !important;
+}
+
+.stat-card.bg-info {
+    background: linear-gradient(135deg, #3b82f6 0%, #06b6d4 100%) !important;
+    border: none !important;
+    box-shadow: 0 8px 32px rgba(59, 130, 246, 0.2) !important;
+}
+
+.stat-card .stat-value {
+    font-size: 2.3rem;
+    font-weight: 900;
+    margin: 0.8rem 0;
+    letter-spacing: -0.02em;
+}
+
+.stat-card .stat-label {
+    font-size: 0.85rem;
+    opacity: 0.95;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Button overrides with modern gradients */
+.btn-custom {
+    border-radius: 12px;
+    padding: 0.75rem 1.6rem;
+    font-weight: 700;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    border: none;
+    font-size: 0.95rem;
+}
+
+.btn-primary.btn-custom {
+    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%) !important;
+    box-shadow: 0 4px 16px rgba(99, 102, 241, 0.25);
+}
+
+.btn-primary.btn-custom:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(99, 102, 241, 0.35);
+}
+
+.btn-success.btn-custom {
+    background: linear-gradient(135deg, #10b981 0%, #06b6d4 100%) !important;
+    box-shadow: 0 4px 16px rgba(16, 185, 129, 0.25);
+}
+
+.btn-success.btn-custom:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(16, 185, 129, 0.35);
+}
+
+.btn-info.btn-custom {
+    background: linear-gradient(135deg, #3b82f6 0%, #06b6d4 100%) !important;
+    box-shadow: 0 4px 16px rgba(59, 130, 246, 0.25);
+}
+
+.btn-info.btn-custom:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(59, 130, 246, 0.35);
+}
+
+/* Professional Icon Colors */
+.text-primary {
+    color: #6366f1 !important;
+}
+
+.text-success {
+    color: #10b981 !important;
+}
+
+.text-info {
+    color: #3b82f6 !important;
+}
+
+.text-danger {
+    color: #ef4444 !important;
+}
+
+.text-warning {
+    color: #f59e0b !important;
+}
+
+/* Hero Section - Clean Typography */
+.display-4 {
+    font-weight: 800;
+    color: #0f172a;
+    letter-spacing: -0.03em;
+}
+
+.lead {
+    font-size: 1.2rem;
+    font-weight: 400;
+    color: var(--text-secondary);
+}
+
+.text-muted {
+    color: var(--text-secondary) !important;
+}
+
+/* Container */
+.container {
+    position: relative;
+    z-index: 1;
+}
+
+/* Footer - Clean & Professional */
+footer {
+    background: rgba(255, 255, 255, 0.8) !important;
+    backdrop-filter: blur(20px) saturate(180%);
+    color: var(--text-primary);
+    padding: 2.5rem 0;
+    margin-top: 4rem;
+    border-top: 1px solid var(--border-color);
+}
+
+footer p {
+    margin: 0.5rem 0;
+    color: var(--text-secondary);
+}
+
+footer small {
+    opacity: 0.8;
+}
+
+/* Card Headers - Modern Accent */
+.card-header {
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.08) 0%, rgba(139, 92, 246, 0.08) 100%) !important;
+    border-bottom: 1px solid rgba(99, 102, 241, 0.15) !important;
+    font-weight: 700 !important;
+    padding: 1.2rem 1.5rem !important;
+    color: var(--text-primary);
+}
+
+.card-header h5 {
+    margin: 0;
+    font-size: 1.1rem;
+}
+
+/* Container fluid */
+.container-fluid {
+    position: relative;
+}
+
+main.container-fluid {
+    min-height: calc(100vh - 300px);
+}
+
+/* Smooth Scrolling */
+html {
+    scroll-behavior: smooth;
+}
+
+/* Selection Color */
+::selection {
+    background: rgba(99, 102, 241, 0.2);
+    color: #0f172a;
+}

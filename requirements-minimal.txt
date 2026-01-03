@@ -1,0 +1,29 @@
+# Requirements minimaux pour démarrer le projet
+# Installer avec: pip install -r requirements-minimal.txt
+
+# Core Flask
+Flask
+Werkzeug
+
+# Databases
+elasticsearch
+pymongo
+redis
+
+# Data (déjà installés normalement)
+# pandas
+# numpy
+
+# Utilities
+Faker
+python-dotenv
+requests
+python-dateutil
+flask-cors
+Flask-Login
+PyJWT
+Flask-WTF
+flasgger
+python-json-logger
+pytest
+pytest-flask

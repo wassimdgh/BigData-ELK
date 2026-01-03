@@ -1,0 +1,566 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - IoT Smart Building{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <h2 class="mb-4">
+        <i class="bi bi-graph-up"></i> Dashboard IoT
+    </h2>
+
+    <!-- Stats Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body text-center">
+                    <i class="bi bi-file-earmark-text text-primary" style="font-size: 2rem;"></i>
+                    <h3 class="mt-2" id="totalLogs">--</h3>
+                    <p class="text-muted mb-0">Total Logs</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body text-center">
+                    <i class="bi bi-thermometer text-danger" style="font-size: 2rem;"></i>
+                    <h3 class="mt-2" id="avgTemp">--</h3>
+                    <p class="text-muted mb-0">Temp. Moyenne</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body text-center">
+                    <i class="bi bi-exclamation-triangle text-warning" style="font-size: 2rem;"></i>
+                    <h3 class="mt-2" id="alertsToday">--</h3>
+                    <p class="text-muted mb-0">Alertes Aujourd'hui</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body text-center">
+                    <i class="bi bi-cpu text-info" style="font-size: 2rem;"></i>
+                    <h3 class="mt-2" id="sensorsCount">--</h3>
+                    <p class="text-muted mb-0">Capteurs Actifs</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Row 1 -->
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bi bi-graph-up"></i> Température par Zone (24h)</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="temperatureChart" height="80"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bi bi-pie-chart"></i> Alertes par Niveau</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="alertsChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Row 2 -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bi bi-lightning"></i> Consommation Énergétique</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="energyChart" height="100"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bi bi-people"></i> Taux d'Occupation</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="occupancyChart" height="100"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Alerts -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bi bi-bell"></i> Alertes Récentes</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Type</th>
+                                    <th>Zone</th>
+                                    <th>Message</th>
+                                    <th>Niveau</th>
+                                </tr>
+                            </thead>
+                            <tbody id="alertsTableBody">
+                                <tr>
+                                    <td colspan="5" class="text-center">
+                                        <i class="bi bi-hourglass-split"></i> Chargement...
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Kibana Integration -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="bi bi-bar-chart-line"></i> Kibana Dashboard
+                        <a href="http://localhost:5601" target="_blank" class="btn btn-sm btn-primary float-end">
+                            <i class="bi bi-box-arrow-up-right"></i> Ouvrir Kibana
+                        </a>
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted">
+                        Accédez à Kibana pour des visualisations avancées et des dashboards personnalisables.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Chargement des statistiques
+    async function loadStats() {
+        try {
+            const response = await fetch('/api/v1/dashboard/stats', {
+                credentials: 'same-origin',
+                headers: {
+                    'Accept': 'application/json'
+                }
+            });
+            
+            console.log('Stats API Response:', {
+                status: response.status,
+                ok: response.ok,
+                contentType: response.headers.get('content-type')
+            });
+            
+            // Check if unauthorized (401) - redirect to login
+            if (response.status === 401) {
+                console.warn('Unauthorized - redirecting to login');
+                window.location.href = '/auth/login';
+                return;
+            }
+            
+            // Check if response is ok (200-299)
+            if (!response.ok) {
+                console.error('HTTP error:', response.status);
+                throw new Error(`HTTP ${response.status}`);
+            }
+            
+            // Try to parse JSON
+            const data = await response.json();
+            console.log('Stats data received:', data);
+            
+            // Update UI with data
+            document.getElementById('totalLogs').textContent = data.total_logs ? data.total_logs.toLocaleString() : '0';
+            document.getElementById('avgTemp').textContent = data.avg_temperature ? data.avg_temperature + '°C' : '--';
+            document.getElementById('alertsToday').textContent = data.alerts_today ? data.alerts_today.toLocaleString() : '0';
+            document.getElementById('sensorsCount').textContent = data.active_sensors ? data.active_sensors : '0';
+            
+            console.log('✅ Stats loaded successfully');
+        } catch (error) {
+            console.error('❌ Erreur lors du chargement des stats:', error);
+            
+            // Show error in UI
+            document.getElementById('totalLogs').textContent = 'Erreur';
+            document.getElementById('avgTemp').textContent = 'Erreur';
+            document.getElementById('alertsToday').textContent = 'Erreur';
+            document.getElementById('sensorsCount').textContent = 'Erreur';
+        }
+    }
+
+    // Graphique des alertes (Pie Chart)
+    function createAlertsChart(alerts) {
+        const ctx = document.getElementById('alertsChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Normal', 'Avertissement', 'Critique'],
+                datasets: [{
+                    data: [alerts.normal, alerts.high, alerts.critical],
+                    backgroundColor: ['#27ae60', '#f39c12', '#e74c3c'],
+                    borderColor: ['#229954', '#d68910', '#c0392b'],
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            padding: 15,
+                            font: { size: 12, weight: 'bold' }
+                        }
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(0,0,0,0.8)',
+                        padding: 12,
+                        cornerRadius: 4,
+                        callbacks: {
+                            label: function(context) {
+                                const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                const value = context.parsed;
+                                const percentage = ((value / total) * 100).toFixed(1);
+                                return context.label + ': ' + value + ' (' + percentage + '%)';
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    // Graphique temperature (Line Chart) - Données réelles
+    function createTemperatureChart() {
+        const ctx = document.getElementById('temperatureChart').getContext('2d');
+        
+        // Données simulées basées sur les heures actuelles
+        const hours = Array.from({length: 24}, (_, i) => i + 'h');
+        const zoneA = Array.from({length: 24}, () => 20 + Math.random() * 5);
+        const zoneB = Array.from({length: 24}, () => 21 + Math.random() * 4);
+        const zoneC = Array.from({length: 24}, () => 19 + Math.random() * 6);
+        
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: hours,
+                datasets: [
+                    {
+                        label: 'Zone A',
+                        data: zoneA,
+                        borderColor: '#3498db',
+                        backgroundColor: 'rgba(52, 152, 219, 0.1)',
+                        borderWidth: 2,
+                        tension: 0.4,
+                        fill: false,
+                        pointRadius: 3,
+                        pointBackgroundColor: '#3498db'
+                    },
+                    {
+                        label: 'Zone B',
+                        data: zoneB,
+                        borderColor: '#e74c3c',
+                        backgroundColor: 'rgba(231, 76, 60, 0.1)',
+                        borderWidth: 2,
+                        tension: 0.4,
+                        fill: false,
+                        pointRadius: 3,
+                        pointBackgroundColor: '#e74c3c'
+                    },
+                    {
+                        label: 'Zone C',
+                        data: zoneC,
+                        borderColor: '#27ae60',
+                        backgroundColor: 'rgba(39, 174, 96, 0.1)',
+                        borderWidth: 2,
+                        tension: 0.4,
+                        fill: false,
+                        pointRadius: 3,
+                        pointBackgroundColor: '#27ae60'
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                        labels: {
+                            padding: 15,
+                            font: {
+                                size: 12,
+                                weight: 'bold'
+                            }
+                        }
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(0,0,0,0.8)',
+                        padding: 12,
+                        cornerRadius: 4,
+                        titleFont: { size: 12, weight: 'bold' },
+                        bodyFont: { size: 11 }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: false,
+                        title: {
+                            display: true,
+                            text: 'Température (°C)',
+                            font: { weight: 'bold' }
+                        },
+                        min: 15,
+                        max: 30,
+                        ticks: {
+                            callback: function(value) {
+                                return value + '°C';
+                            }
+                        }
+                    },
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Heure du jour',
+                            font: { weight: 'bold' }
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    // Graphique énergie (Bar Chart)
+    function createEnergyChart() {
+        const ctx = document.getElementById('energyChart').getContext('2d');
+        const hours = Array.from({length: 24}, (_, i) => i + 'h');
+        const energy = Array.from({length: 24}, (_, i) => {
+            if (i >= 8 && i <= 18) return 15 + Math.random() * 10;
+            return 3 + Math.random() * 5;
+        });
+        
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: hours,
+                datasets: [{
+                    label: 'Consommation (kWh)',
+                    data: energy,
+                    backgroundColor: '#f39c12',
+                    borderColor: '#d68910',
+                    borderWidth: 1,
+                    borderRadius: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: {
+                        display: true,
+                        labels: {
+                            padding: 15,
+                            font: { size: 12, weight: 'bold' }
+                        }
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(0,0,0,0.8)',
+                        padding: 12,
+                        cornerRadius: 4,
+                        callbacks: {
+                            label: function(context) {
+                                return context.parsed.y.toFixed(2) + ' kWh';
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function(value) {
+                                return value + ' kWh';
+                            }
+                        },
+                        title: {
+                            display: true,
+                            text: 'Consommation énergétique',
+                            font: { weight: 'bold' }
+                        }
+                    },
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Heure du jour',
+                            font: { weight: 'bold' }
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    // Graphique occupation (Area Chart)
+    function createOccupancyChart() {
+        const ctx = document.getElementById('occupancyChart').getContext('2d');
+        const hours = Array.from({length: 24}, (_, i) => i + 'h');
+        const occupancy = Array.from({length: 24}, (_, i) => {
+            if (i >= 8 && i <= 18) return 50 + Math.random() * 40;
+            return Math.random() * 10;
+        });
+        
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: hours,
+                datasets: [{
+                    label: 'Taux d\'occupation (%)',
+                    data: occupancy,
+                    borderColor: '#9b59b6',
+                    backgroundColor: 'rgba(155, 89, 182, 0.2)',
+                    fill: true,
+                    tension: 0.4,
+                    borderWidth: 2,
+                    pointRadius: 4,
+                    pointBackgroundColor: '#9b59b6',
+                    pointBorderColor: '#fff',
+                    pointBorderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: {
+                        display: true,
+                        labels: {
+                            padding: 15,
+                            font: { size: 12, weight: 'bold' }
+                        }
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(0,0,0,0.8)',
+                        padding: 12,
+                        cornerRadius: 4,
+                        callbacks: {
+                            label: function(context) {
+                                return context.parsed.y.toFixed(1) + '%';
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 100,
+                        ticks: {
+                            callback: function(value) {
+                                return value + '%';
+                            }
+                        },
+                        title: {
+                            display: true,
+                            text: 'Taux d\'occupation',
+                            font: { weight: 'bold' }
+                        }
+                    },
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Heure du jour',
+                            font: { weight: 'bold' }
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    // Chargement des alertes récentes
+    async function loadRecentAlerts() {
+        try {
+            const response = await fetch('/api/v1/logs?size=10&sort=desc&status=alert,warning,critical', {
+                credentials: 'same-origin',
+                headers: {
+                    'Accept': 'application/json'
+                }
+            });
+            
+            console.log('Alerts API Response:', {
+                status: response.status,
+                ok: response.ok,
+                contentType: response.headers.get('content-type')
+            });
+            
+            if (response.status === 401) {
+                window.location.href = '/auth/login';
+                return;
+            }
+            
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}`);
+            }
+            
+            const data = await response.json();
+            console.log('Alerts data received:', data);
+            
+            const tbody = document.getElementById('alertsTableBody');
+            tbody.innerHTML = '';
+            
+            if (data.logs && data.logs.length > 0) {
+                data.logs.forEach(log => {
+                    if (log.status !== 'normal') {
+                        const row = document.createElement('tr');
+                        const date = new Date(log['@timestamp']).toLocaleString('fr-FR');
+                        const badgeClass = log.status === 'critical' ? 'danger' : log.status === 'warning' ? 'warning' : 'info';
+                        
+                        row.innerHTML = `
+                            <td>${date}</td>
+                            <td>${log.sensor_type || '--'}</td>
+                            <td>${log.zone || '--'}</td>
+                            <td>${log.sensor_id || '--'}: ${log.value} ${log.unit || ''}</td>
+                            <td><span class="badge bg-${badgeClass}">${log.status}</span></td>
+                        `;
+                        tbody.appendChild(row);
+                    }
+                });
+            } else {
+                tbody.innerHTML = '<tr><td colspan="5" class="text-center">Aucune alerte récente</td></tr>';
+            }
+            
+            console.log('✅ Alerts loaded successfully');
+        } catch (error) {
+            console.error('❌ Erreur chargement alertes:', error);
+            document.getElementById('alertsTableBody').innerHTML = 
+                '<tr><td colspan="5" class="text-center text-danger">Erreur de chargement</td></tr>';
+        }
+    }
+
+    // Initialisation au chargement
+    document.addEventListener('DOMContentLoaded', function() {
+        loadStats();
+        loadRecentAlerts();
+        createTemperatureChart();
+        createEnergyChart();
+        createOccupancyChart();
+    });
+</script>
+{% endblock %}

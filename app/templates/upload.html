@@ -1,0 +1,261 @@
+{% extends "base.html" %}
+
+{% block title %}Upload - IoT Smart Building{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <h2 class="mb-4">
+                <i class="bi bi-cloud-upload"></i> Upload de Fichiers
+            </h2>
+
+            <!-- Upload Form -->
+            <div class="card mb-4">
+                <div class="card-body">
+                    <form id="uploadForm" enctype="multipart/form-data">
+                        <div class="mb-3">
+                            <label for="fileInput" class="form-label">
+                                Sélectionnez un fichier (CSV ou JSON)
+                            </label>
+                            <input class="form-control" type="file" id="fileInput" 
+                                   accept=".csv,.json,.log" required>
+                            <div class="form-text">
+                                Formats acceptés: CSV, JSON, LOG - Taille max: 100 MB
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="userInput" class="form-label">
+                                Votre nom (optionnel)
+                            </label>
+                            <input type="text" class="form-control" id="userInput" 
+                                   placeholder="Nom de l'utilisateur">
+                        </div>
+
+                        <div class="mb-3">
+                            <div class="progress" id="progressContainer" style="display: none;">
+                                <div class="progress-bar progress-bar-striped progress-bar-animated" 
+                                     role="progressbar" id="progressBar" style="width: 0%">
+                                </div>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary btn-lg w-100" id="submitBtn">
+                            <i class="bi bi-upload"></i> Uploader le fichier
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Messages -->
+            <div id="messageContainer"></div>
+
+            <!-- Recent Uploads -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="bi bi-clock-history"></i> Fichiers Récents
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover" id="recentFiles">
+                            <thead>
+                                <tr>
+                                    <th>Nom du fichier</th>
+                                    <th>Taille</th>
+                                    <th>Date</th>
+                                    <th>Statut</th>
+                                </tr>
+                            </thead>
+                            <tbody id="filesTableBody">
+                                <tr>
+                                    <td colspan="4" class="text-center text-muted">
+                                        <i class="bi bi-hourglass-split"></i> Chargement...
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.getElementById('uploadForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+
+        const fileInput = document.getElementById('fileInput');
+        const userInput = document.getElementById('userInput');
+        const submitBtn = document.getElementById('submitBtn');
+        const progressContainer = document.getElementById('progressContainer');
+        const progressBar = document.getElementById('progressBar');
+        const messageContainer = document.getElementById('messageContainer');
+
+        if (!fileInput.files[0]) {
+            showMessage('Veuillez sélectionner un fichier', 'danger');
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('file', fileInput.files[0]);
+        formData.append('user', userInput.value || 'anonymous');
+
+        // Afficher la barre de progression
+        progressContainer.style.display = 'block';
+        submitBtn.disabled = true;
+        progressBar.style.width = '0%';
+
+        try {
+            // Simuler la progression
+            let progress = 0;
+            const progressInterval = setInterval(() => {
+                if (progress < 90) {
+                    progress += 10;
+                    progressBar.style.width = progress + '%';
+                }
+            }, 200);
+
+            const response = await fetch('/upload/file', {
+                method: 'POST',
+                body: formData
+            });
+
+            clearInterval(progressInterval);
+            progressBar.style.width = '100%';
+
+            const result = await response.json();
+
+            if (response.ok) {
+                showMessage('✅ Fichier uploadé avec succès! L\'ingestion va commencer...', 'success');
+                fileInput.value = '';
+                userInput.value = '';
+                loadRecentFiles();
+            } else {
+                showMessage('❌ Erreur: ' + result.error, 'danger');
+            }
+        } catch (error) {
+            showMessage('❌ Erreur lors de l\'upload: ' + error.message, 'danger');
+        } finally {
+            submitBtn.disabled = false;
+            setTimeout(() => {
+                progressContainer.style.display = 'none';
+            }, 2000);
+        }
+    });
+
+    function showMessage(message, type) {
+        const messageContainer = document.getElementById('messageContainer');
+        messageContainer.innerHTML = `
+            <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        `;
+    }
+
+    async function loadRecentFiles() {
+        try {
+            const response = await fetch('/api/v1/files', {
+                credentials: 'same-origin'
+            });
+            
+            // Check if response is not OK or if we got redirected to login
+            if (!response.ok || response.redirected) {
+                console.warn('Session expired or not authenticated');
+                const tbody = document.getElementById('filesTableBody');
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="4" class="text-center text-warning">
+                            <i class="bi bi-exclamation-triangle"></i>
+                            Session expirée. Veuillez vous reconnecter.
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            const contentType = response.headers.get('content-type');
+            if (!contentType || !contentType.includes('application/json')) {
+                console.warn('Response is not JSON, likely redirected to login');
+                const tbody = document.getElementById('filesTableBody');
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="4" class="text-center text-warning">
+                            <i class="bi bi-exclamation-triangle"></i>
+                            Session expirée. Veuillez <a href="/auth/login">vous reconnecter</a>.
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            const data = await response.json();
+            const tbody = document.getElementById('filesTableBody');
+            
+            if (data.files && data.files.length > 0) {
+                tbody.innerHTML = data.files.map(file => `
+                    <tr>
+                        <td>
+                            <i class="bi bi-file-earmark-text"></i> 
+                            ${file.original_filename || file.filename}
+                        </td>
+                        <td>${formatFileSize(file.size)}</td>
+                        <td>${new Date(file.upload_date).toLocaleString('fr-FR')}</td>
+                        <td>
+                            <span class="badge bg-${getStatusColor(file.status)}">
+                                ${file.status}
+                            </span>
+                        </td>
+                    </tr>
+                `).join('');
+            } else {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="4" class="text-center text-muted">
+                            Aucun fichier uploadé
+                        </td>
+                    </tr>
+                `;
+            }
+        } catch (error) {
+            console.error('Erreur lors du chargement des fichiers:', error);
+            const tbody = document.getElementById('filesTableBody');
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="4" class="text-center text-danger">
+                        <i class="bi bi-x-circle"></i>
+                        Erreur de chargement. Veuillez rafraîchir la page.
+                    </td>
+                </tr>
+            `;
+        }
+    }
+
+    function formatFileSize(bytes) {
+        if (bytes === 0) return '0 Bytes';
+        const k = 1024;
+        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
+    }
+
+    function getStatusColor(status) {
+        const colors = {
+            'uploaded': 'info',
+            'processing': 'warning',
+            'processed': 'success',
+            'error': 'danger'
+        };
+        return colors[status] || 'secondary';
+    }
+
+    // Charger les fichiers au chargement de la page
+    document.addEventListener('DOMContentLoaded', loadRecentFiles);
+</script>
+{% endblock %}

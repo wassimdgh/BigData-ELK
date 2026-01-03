@@ -1,0 +1,194 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Dashboard - IoT Smart Building Monitoring{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row mb-4">
+        <div class="col">
+            <h1><i class="bi bi-shield-gear"></i> Admin Dashboard</h1>
+            <p class="text-muted">Manage users and system settings</p>
+        </div>
+    </div>
+
+    <!-- Stats Row -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card shadow-sm border-0 text-center">
+                <div class="card-body">
+                    <h6 class="text-muted">Total Users</h6>
+                    <h2 class="text-primary mb-0" id="totalUsers">-</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card shadow-sm border-0 text-center">
+                <div class="card-body">
+                    <h6 class="text-muted">Total Files</h6>
+                    <h2 class="text-success mb-0" id="totalFiles">-</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card shadow-sm border-0 text-center">
+                <div class="card-body">
+                    <h6 class="text-muted">Total Logs</h6>
+                    <h2 class="text-info mb-0" id="totalLogs">-</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card shadow-sm border-0 text-center">
+                <div class="card-body">
+                    <h6 class="text-muted">Admin Count</h6>
+                    <h2 class="text-warning mb-0" id="adminCount">-</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Users Management -->
+    <div class="card shadow-sm border-0">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0"><i class="bi bi-people"></i> User Management</h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover" id="usersTable">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Username</th>
+                            <th>Email</th>
+                            <th>Role</th>
+                            <th>Admin</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="usersTableBody">
+                        <tr>
+                            <td colspan="6" class="text-center text-muted">Loading users...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Load admin stats
+async function loadStats() {
+    try {
+        const response = await fetch('/admin/api/stats');
+        const data = await response.json();
+        
+        document.getElementById('totalUsers').textContent = data.total_users;
+        document.getElementById('totalFiles').textContent = data.total_files;
+        document.getElementById('totalLogs').textContent = data.total_logs;
+    } catch (error) {
+        console.error('Error loading stats:', error);
+    }
+}
+
+// Load users
+async function loadUsers() {
+    try {
+        const response = await fetch('/admin/api/users');
+        const data = await response.json();
+        
+        const tbody = document.getElementById('usersTableBody');
+        tbody.innerHTML = '';
+        
+        let adminCount = 0;
+        
+        data.users.forEach(user => {
+            if (user.is_admin) adminCount++;
+            
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td><strong>${user.username}</strong></td>
+                <td>${user.email}</td>
+                <td>
+                    <span class="badge bg-info">${user.role.toUpperCase()}</span>
+                </td>
+                <td>
+                    ${user.is_admin ? '<i class="bi bi-check-circle text-success"></i>' : '<i class="bi bi-x-circle text-muted"></i>'}
+                </td>
+                <td>
+                    ${user.is_active ? '<span class="badge bg-success">Active</span>' : '<span class="badge bg-danger">Inactive</span>'}
+                </td>
+                <td>
+                    <div class="btn-group btn-group-sm" role="group">
+                        <button class="btn btn-outline-primary" onclick="editUser('${user._id}')">
+                            <i class="bi bi-pencil"></i>
+                        </button>
+                        ${user.is_active ? 
+                            `<button class="btn btn-outline-danger" onclick="deactivateUser('${user._id}')">
+                                <i class="bi bi-lock"></i>
+                            </button>` :
+                            `<button class="btn btn-outline-success" onclick="activateUser('${user._id}')">
+                                <i class="bi bi-unlock"></i>
+                            </button>`
+                        }
+                    </div>
+                </td>
+            `;
+            tbody.appendChild(row);
+        });
+        
+        document.getElementById('adminCount').textContent = adminCount;
+    } catch (error) {
+        console.error('Error loading users:', error);
+    }
+}
+
+function editUser(userId) {
+    alert('User edit feature coming soon!');
+}
+
+async function deactivateUser(userId) {
+    if (!confirm('Are you sure you want to deactivate this user?')) return;
+    
+    try {
+        const response = await fetch(`/admin/users/${userId}/deactivate`, {
+            method: 'POST'
+        });
+        
+        if (response.ok) {
+            alert('User deactivated successfully');
+            loadUsers();
+        } else {
+            alert('Failed to deactivate user');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+    }
+}
+
+async function activateUser(userId) {
+    if (!confirm('Are you sure you want to activate this user?')) return;
+    
+    try {
+        const response = await fetch(`/admin/users/${userId}/activate`, {
+            method: 'POST'
+        });
+        
+        if (response.ok) {
+            alert('User activated successfully');
+            loadUsers();
+        } else {
+            alert('Failed to activate user');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+    }
+}
+
+// Load on page load
+document.addEventListener('DOMContentLoaded', () => {
+    loadStats();
+    loadUsers();
+});
+</script>
+{% endblock %}

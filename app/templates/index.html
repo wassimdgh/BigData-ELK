@@ -1,0 +1,205 @@
+{% extends "base.html" %}
+
+{% block title %}Accueil - IoT Smart Building{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Hero Section -->
+    <div class="row mt-5 mb-5">
+        <div class="col-12 text-center">
+            <h1 class="display-4 mb-3">
+                <i class="bi bi-building text-primary"></i>
+                Plateforme de Monitoring IoT
+            </h1>
+            <p class="lead text-muted">
+                Surveillance en temps réel de votre bâtiment intelligent
+            </p>
+            <p class="text-muted">
+                Température • Humidité • CO2 • Énergie • Occupation • Luminosité
+            </p>
+        </div>
+    </div>
+
+    <!-- Quick Stats -->
+    <div class="row mb-5">
+        <div class="col-md-3">
+            <div class="card stat-card bg-primary text-white">
+                <div class="card-body">
+                    <i class="bi bi-thermometer-half" style="font-size: 3rem;"></i>
+                    <div class="stat-value" id="temp-stat">--</div>
+                    <div class="stat-label">Température Moyenne</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card stat-card bg-success text-white">
+                <div class="card-body">
+                    <i class="bi bi-file-earmark-text" style="font-size: 3rem;"></i>
+                    <div class="stat-value" id="logs-stat">--</div>
+                    <div class="stat-label">Total Logs</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card stat-card bg-warning text-white">
+                <div class="card-body">
+                    <i class="bi bi-exclamation-triangle" style="font-size: 3rem;"></i>
+                    <div class="stat-value" id="alerts-stat">--</div>
+                    <div class="stat-label">Alertes Aujourd'hui</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card stat-card bg-info text-white">
+                <div class="card-body">
+                    <i class="bi bi-lightning-charge" style="font-size: 3rem;"></i>
+                    <div class="stat-value" id="energy-stat">--</div>
+                    <div class="stat-label">Consommation Énergie</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Features -->
+    <div class="row mb-5">
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <i class="bi bi-cloud-upload text-primary" style="font-size: 3rem;"></i>
+                    <h5 class="card-title mt-3">Upload de Données</h5>
+                    <p class="card-text">
+                        Importez vos fichiers de logs (CSV, JSON) pour analyse immédiate
+                    </p>
+                    <a href="/upload" class="btn btn-primary btn-custom">
+                        <i class="bi bi-upload"></i> Uploader
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <i class="bi bi-search text-success" style="font-size: 3rem;"></i>
+                    <h5 class="card-title mt-3">Recherche Avancée</h5>
+                    <p class="card-text">
+                        Recherchez dans des millions de logs avec des filtres puissants
+                    </p>
+                    <a href="/search" class="btn btn-success btn-custom">
+                        <i class="bi bi-search"></i> Rechercher
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <i class="bi bi-graph-up text-info" style="font-size: 3rem;"></i>
+                    <h5 class="card-title mt-3">Visualisation</h5>
+                    <p class="card-text">
+                        Dashboards interactifs et graphiques en temps réel avec Kibana
+                    </p>
+                    <a href="/dashboard" class="btn btn-info btn-custom text-white">
+                        <i class="bi bi-bar-chart"></i> Dashboard
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Use Cases -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bi bi-bullseye"></i> Cas d'Usage Prioritaires</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="d-flex align-items-start mb-3">
+                                <i class="bi bi-thermometer-high text-danger me-3" style="font-size: 2rem;"></i>
+                                <div>
+                                    <h6>Alerte Température Critique</h6>
+                                    <p class="text-muted small">
+                                        Détection automatique des températures anormales
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="d-flex align-items-start mb-3">
+                                <i class="bi bi-lightning text-warning me-3" style="font-size: 2rem;"></i>
+                                <div>
+                                    <h6>Optimisation Énergétique</h6>
+                                    <p class="text-muted small">
+                                        Analyse des patterns de consommation
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="d-flex align-items-start mb-3">
+                                <i class="bi bi-wrench text-primary me-3" style="font-size: 2rem;"></i>
+                                <div>
+                                    <h6>Prédiction de Pannes</h6>
+                                    <p class="text-muted small">
+                                        Machine Learning sur données historiques
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Charger les statistiques au chargement de la page
+    document.addEventListener('DOMContentLoaded', async function() {
+        try {
+            const response = await fetch('/api/v1/stats', {
+                credentials: 'same-origin',
+                headers: { 'Accept': 'application/json' }
+            });
+
+            const contentType = response.headers.get('content-type');
+            console.log('Accueil Stats API Response:', { status: response.status, ok: response.ok, contentType });
+
+            if (response.status === 401 || !contentType || !contentType.includes('application/json')) {
+                console.warn('Not authenticated or non-JSON response, redirecting to login');
+                window.location.href = '/auth/login';
+                return;
+            }
+
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}`);
+            }
+
+            const data = await response.json();
+            console.log('Accueil Stats data received:', data);
+
+            const totalLogs = (data && typeof data.total_logs === 'number') ? data.total_logs : 0;
+            const alertsCritical = (data && data.alerts && typeof data.alerts.critical === 'number') ? data.alerts.critical : 0;
+            const alertsHigh = (data && data.alerts && typeof data.alerts.high === 'number') ? data.alerts.high : 0;
+            const avgTemp = (data && typeof data.avg_temperature === 'number') ? `${data.avg_temperature}°C` : '--';
+
+            document.getElementById('logs-stat').textContent = totalLogs.toLocaleString();
+            document.getElementById('alerts-stat').textContent = (alertsCritical + alertsHigh).toLocaleString();
+            document.getElementById('temp-stat').textContent = avgTemp;
+            // Placeholder energy until implemented via API
+            document.getElementById('energy-stat').textContent = '--';
+
+        } catch (error) {
+            console.error('Erreur lors du chargement des stats:', error);
+            document.getElementById('logs-stat').textContent = 'Erreur';
+            document.getElementById('alerts-stat').textContent = 'Erreur';
+            document.getElementById('temp-stat').textContent = 'Erreur';
+            document.getElementById('energy-stat').textContent = 'Erreur';
+        }
+    });
+</script>
+{% endblock %}
